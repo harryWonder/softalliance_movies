@@ -30,4 +30,10 @@ export class MovieRepository extends Model {
 
   }
 
+  async deleteMovie(condition: Partial<Movie>) {
+
+    return await this.delete(Movie, condition);
+
+  }
+
 }

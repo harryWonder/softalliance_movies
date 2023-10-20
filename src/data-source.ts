@@ -3,7 +3,7 @@ import { DataSource, DataSourceOptions } from "typeorm"
 import Database from "./config/database.config"
 
 export const AppDataSource = new DataSource(<DataSourceOptions>{
-    type: "postgres",
+    type: "mysql",
     host: Database.DATABASE_HOST,
     port: Database.DATABASE_PORT,
     username: Database.DATABASE_USER,
@@ -12,7 +12,6 @@ export const AppDataSource = new DataSource(<DataSourceOptions>{
     synchronize: false,
     logging: true,
     logger: "advanced-console",
-    timezone: "Africa/Lagos",
     supportBigNumbers: true,
     entities: [
       __dirname + "/entity/*.ts",

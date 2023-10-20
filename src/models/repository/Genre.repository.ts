@@ -30,4 +30,10 @@ export class GenreRepository extends Model {
 
   }
 
+  async deleteGenre(condition: Partial<Genre>) {
+    
+    return await this.delete(Genre, condition);
+
+  }
+
 }

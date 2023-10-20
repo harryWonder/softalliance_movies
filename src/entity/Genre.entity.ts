@@ -1,10 +1,10 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("genres")
 export class Genre {
 
-  @PrimaryColumn("uuid")
-  id: string
+  @PrimaryGeneratedColumn("uuid")
+  id?: string
 
   @Column()
   name: string
@@ -13,9 +13,9 @@ export class Genre {
   status_id: number
 
   @CreateDateColumn({ type: "timestamp" })
-  created_at: Date
+  created_at?: Date
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date
+  updated_at?: Date
 
 }

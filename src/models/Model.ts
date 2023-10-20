@@ -170,6 +170,16 @@ export class Model {
     return await this.QueryRunner.manager.save(data) as T;
   }
 
+  async delete<T>(model: EntityTarget<T>, data: DeepPartial<T>, dataSource?: DataSource, t?: boolean) {
+    dataSource = dataSource || MysqlDataSource
+
+    if (!t) {
+      return await dataSource.manager.delete(model, data);
+    }
+
+    return await this.QueryRunner.manager.delete(model, data);
+  }
+
 
   queryBuilder<T>(model: EntityTarget<T>, alias?: string, dataSource?: DataSource) {
     dataSource = dataSource || MysqlDataSource
