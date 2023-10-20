@@ -1,4 +1,4 @@
-import { FindOptionsOrderValue } from "typeorm";
+import { FindOptionsOrderValue, In } from "typeorm";
 import { Genre } from "../../entity/Genre.entity";
 import { Model } from "../Model";
 
@@ -21,6 +21,20 @@ export class GenreRepository extends Model {
   async findAllGenre(genre: Partial<Genre>, orderOptions: FindOptionsOrderValue = "ASC") {
 
     return await this.findMany(Genre, { where: { ...genre }, order: { created_at: orderOptions } });
+
+  }
+  
+  async findGenreByIDS(status: number, ids: string[], orderOptions: FindOptionsOrderValue = "ASC") {
+
+    return await this.findMany(Genre, {
+      where: {
+        id: In(ids),
+        status_id: status
+      },
+      order: {
+        created_at: orderOptions
+      }
+    })
 
   }
 

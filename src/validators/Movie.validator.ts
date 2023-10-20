@@ -1,6 +1,8 @@
 import Joi from "joi";
 import { MovieRepository } from '../models/repository/Movie.repository';
 import HttpStatusCodes from "../utils/HttpStatusCodes";
+import { FileArray } from "express-fileupload";
+import FileSize from "filesize";
 
 export class MovieValidator {
 
@@ -18,7 +20,7 @@ export class MovieValidator {
     this.MovieRepository = new MovieRepository();
   }
 
-  public async validateCreateMovie(name: string, is_active: boolean) {
+  public async validateCreateMovie(name: string, description: string, release_date: string, rating: number, ticket_price: number, country: string) {
 
     try {
       const Schema = Joi.object({
@@ -42,22 +44,13 @@ export class MovieValidator {
           .required()
       });
 
-      const validationResponse = Schema.validate({ name, is_active }, { abortEarly: true, allowUnknown: true });
-      const isMovieNameUnique = await this.MovieRepository.findOneMovie({ name });
+      const validationResponse = Schema.validate({ name, description, release_date, rating, ticket_price, country }, { abortEarly: true, allowUnknown: true });
 
       console.log(validationResponse.error);
 
       if (validationResponse.error && validationResponse.error.details.length > 0) {
         this.Response.message = validationResponse.error.details[0].message;
         this.Response.status = false;
-
-        return this.Response;
-      }
-
-      if (isMovieNameUnique) {
-        this.Response.status = false;
-        this.Response.message = "Sorry, A Movie with this name already exists!";
-        this.Response.statusCode = HttpStatusCodes.CONFLICT;
 
         return this.Response;
       }
@@ -76,7 +69,7 @@ export class MovieValidator {
 
   }
 
-  public async validateUpdateMovie(name: string, is_active: boolean, MovieId: string) {
+  public async validateUpdateMovie(name: string, description: string, release_date: string, rating: number, ticket_price: number, country: string, MovieId: string) {
 
     try {
       const Schema = Joi.object({
@@ -100,7 +93,7 @@ export class MovieValidator {
           .required()
       });
 
-      const validationResponse = Schema.validate({ name, is_active }, { abortEarly: true, allowUnknown: true });
+      const validationResponse = Schema.validate({ name, description, release_date, rating, ticket_price, country }, { abortEarly: true, allowUnknown: true });
       if (validationResponse.error && validationResponse.error.details.length > 0) {
         this.Response.message = validationResponse.error.details[0].message;
         this.Response.status = false;
@@ -118,16 +111,6 @@ export class MovieValidator {
         return this.Response;
       }
 
-      // Confirm the name is unique...
-      const isNameUnique = await this.MovieRepository.findOneMovie({ name: name });
-      if (isNameUnique && isNameUnique.id != MovieId) {
-        this.Response.message = "Sorry, A Movie with this name already exists!";
-        this.Response.status = false;
-        this.Response.statusCode = HttpStatusCodes.CONFLICT;
-
-        return this.Response;
-      }
-
       this.Response.status = true;
       this.Response.message = "Validation Passed!";
 
@@ -141,6 +124,66 @@ export class MovieValidator {
       return this.Response;
     }
 
+  }
+
+
+  public async validatePhotoUpload(Payload: FileArray) {
+
+    try {
+      /* Get the filesize && extension */
+      const fileName: string = Payload.coverImage['name'];
+      const fileSizeNumeric: number = Math.round(parseFloat(FileSize(Payload.coverImage['size']).split(' ')[0]));
+      const fileSizeString: string = FileSize(Payload.coverImage['size']).split(' ')[1];
+      const fileExtensionArray: string[] = fileName.split('.');
+      const fileExtension: string = fileExtensionArray[fileExtensionArray.length - 1];
+
+      if (fileSizeString == 'KB' || fileSizeString == 'B') {
+        this.Response.statusCode = HttpStatusCodes.BAD_REQUEST;
+        this.Response.message = "Sorry, The uploaded file exeeds the acceptable limit!";
+
+        return this.Response;
+      }
+
+      if (fileSizeString == 'MB') {
+        /* Do Code Validations */
+        if (fileSizeNumeric > 5) {
+          this.Response.status = true
+          this.Response.message = 'Sorry, The uploaded image is too large!'
+          this.Response.statusCode = HttpStatusCodes.BAD_REQUEST
+
+          return this.Response;
+        }
+      }
+
+      if (['GB', 'TB', 'PB', 'EB', 'ZB', 'YB'].includes(fileSizeString)) {
+
+        this.Response.status = true
+        this.Response.message = 'Sorry, The uploaded image is too large!'
+        this.Response.statusCode = HttpStatusCodes.BAD_REQUEST
+
+        return this.Response;
+      }
+
+      if (!['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'heic'].includes(fileExtension.toLocaleLowerCase())) {
+        this.Response.status = true;
+        this.Response.message = 'Please, upload a valid image file!';
+        this.Response.statusCode = HttpStatusCodes.BAD_REQUEST;
+
+        return this.Response;
+      }
+
+      this.Response.status = true;
+      this.Response.message = "Validation Passed!";
+
+      return this.Response;
+    } catch (err: unknown) {
+      console.log(err, "An unexpected error occurred and the Movie could not be validated!");
+
+      this.Response.status = false;
+      this.Response.message = "An unexpected error occurred and the Genre could not be validated!";
+
+      return this.Response;
+    }
   }
 
 }
