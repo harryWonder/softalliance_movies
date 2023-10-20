@@ -1,6 +1,7 @@
+import { MovieGenrePivot } from "../../entity/Movie-Genre-Pivot.entity";
 import { Model } from "../Model";
 
-export class MovieGenrePivot extends Model {
+export class MovieGenrePivotRepository extends Model {
 
   constructor() { super(); }
 
@@ -19,6 +20,12 @@ export class MovieGenrePivot extends Model {
   async updatePivot(condition: Partial<MovieGenrePivot>, changes: Partial<MovieGenrePivot>) {
 
     return await this.update(MovieGenrePivot, condition, changes);
+
+  }
+
+  async deletePivot(condition: Partial<MovieGenrePivot>) {
+
+    return await this.delete(MovieGenrePivot, condition);
 
   }
 

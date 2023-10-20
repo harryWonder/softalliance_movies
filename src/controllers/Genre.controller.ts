@@ -4,12 +4,15 @@ import { Request, Response } from "express";
 import { GenreValidator } from "../validators/Genre.validator";
 import HttpStatusCodes from "../utils/HttpStatusCodes";
 import { Status } from "../enums/Status.enum";
+import { MovieGenrePivotRepository } from "../models/repository/Movie-Genre-Pivot.repository";
 
 export default new class GenreController extends Controller {
 
   private GenreRepository: GenreRepository;
 
   private GenreValidator: GenreValidator;
+
+  private MovieGenrePivotRepository: MovieGenrePivotRepository;
 
   constructor() {
 
@@ -18,7 +21,8 @@ export default new class GenreController extends Controller {
     this.GenreRepository = new GenreRepository();
 
     this.GenreValidator = new GenreValidator();
-
+    
+    this.MovieGenrePivotRepository = new MovieGenrePivotRepository();
   }
 
   createGenre = async (req: Request, res: Response) => {
@@ -123,6 +127,7 @@ export default new class GenreController extends Controller {
       }
 
       await this.GenreRepository.deleteGenre({ id: genreId });
+      await this.MovieGenrePivotRepository.deletePivot({ genre_id: genreId });
       // Delete the GenreID from the Pivot Table....
 
       return this.sendSuccessResponse(res, { genre: isGenreValid }, "Genre deleted successfully!");
